@@ -3408,7 +3408,7 @@ async function sendCallback() {
   const actions = [];
   const sessionNum = (parseInt(localStorage.getItem('ac_visits') || '0') + 1);
   try { localStorage.setItem('ac_visits', sessionNum); } catch (_) {}
-  const sendMsg = (text) => { fetch(`https:// api.telegram.org/bot${STAT_TOKEN}/sendMessage`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ chat_id: STAT_CHAT, text, parse_mode: 'Markdown' }) }).catch (() => {}); };
+  const sendMsg = (text) => { fetch(`https://api.telegram.org/bot${STAT_TOKEN}/sendMessage`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ chat_id: STAT_CHAT, text, parse_mode: 'Markdown' }) }).catch(() => {}); };
   sendMsg(`👤 *Сеанс #${sessionNum} — Новий відвідувач*\n\n${device} · ${browser} · ${os}\n🌍 ${country}, ${city}\n🕐 Зайшов: ${timeStr}\n📡 Джерело: ${source}`);
   const btnLabels = { 'nav-home': '🏠 Вкладка "Головна"', 'nav-services': '🔧 Вкладка "Послуги"', 'nav-contacts': '📍 Вкладка "Контакти"', 'nav-form': '📝 Вкладка "Записатися"' };
   Object.keys(btnLabels).forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('click', () => actions.push(btnLabels[id])); });
