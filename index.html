@@ -2866,15 +2866,29 @@ async function sendCallback() {
   const STAT_TOKEN = '8586689192:AAFSNHwoVXig-qnR4KSuKizbzLw6LOyER3A';
   const STAT_CHAT  = '8272212055';
 
-  const device = /Mobi|Android/i.test(navigator.userAgent)
-    ? '📱 Телефон'
-    : /Tablet|iPad/i.test(navigator.userAgent)
-      ? '📟 Планшет'
-      : '🖥 ПК';
+  // ── Визначаємо пристрій і браузер ──
+  const ua = navigator.userAgent;
+  const device = /Mobi|Android/i.test(ua) ? '📱 Телефон'
+    : /Tablet|iPad/i.test(ua) ? '📟 Планшет' : '🖥 ПК';
 
+  const browser = /Edg/i.test(ua) ? 'Edge'
+    : /OPR|Opera/i.test(ua) ? 'Opera'
+    : /Chrome/i.test(ua) ? 'Chrome'
+    : /Firefox/i.test(ua) ? 'Firefox'
+    : /Safari/i.test(ua) ? 'Safari' : 'Інший';
+
+  const os = /Windows/i.test(ua) ? 'Windows'
+    : /Mac OS/i.test(ua) ? 'macOS'
+    : /Android/i.test(ua) ? 'Android'
+    : /iPhone|iPad/i.test(ua) ? 'iOS'
+    : /Linux/i.test(ua) ? 'Linux' : '—';
+
+  // ── Час входу ──
+  const startTime = Date.now();
   const now = new Date();
-  const time = now.toLocaleString('uk-UA', { timeZone: 'Europe/Kiev', hour12: false });
+  const timeStr = now.toLocaleString('uk-UA', { timeZone: 'Europe/Kiev', hour12: false });
 
+  // ── Геолокація ──
   let city = '—', country = '—';
   try {
     const geo = await fetch('https://ipapi.co/json/');
@@ -2883,21 +2897,101 @@ async function sendCallback() {
     country = gd.country_name || '—';
   } catch(_) {}
 
-  const page = document.title || 'AutoChampion';
-  const ref  = document.referrer ? `\n🔗 Джерело: ${document.referrer}` : '';
+  // ── Джерело трафіку ──
+  let source = '— прямий захід';
+  if (document.referrer) {
+    try {
+      const ref = new URL(document.referrer);
+      const h = ref.hostname;
+      if (/google/i.test(h)) source = '🔍 Google';
+      else if (/facebook|fb/i.test(h)) source = '📘 Facebook';
+      else if (/instagram/i.test(h)) source = '📷 Instagram';
+      else if (/telegram/i.test(h)) source = '✈️ Telegram';
+      else source = '🔗 ' + h;
+    } catch(_) { source = '🔗 ' + document.referrer; }
+  }
 
-  const msg =
-    `👁 *Новий відвідувач*\n\n` +
-    `${device}\n` +
-    `🕐 ${time}\n` +
-    `🌍 ${country}, ${city}${ref}\n` +
-    `📄 Сайт: AutoChampion`;
+  // ── Лічильник дій ──
+  const actions = [];
+  const sessionNum = (parseInt(localStorage.getItem('ac_visits') || '0') + 1);
+  try { localStorage.setItem('ac_visits', sessionNum); } catch(_) {}
 
-  fetch(`https://api.telegram.org/bot${STAT_TOKEN}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: STAT_CHAT, text: msg, parse_mode: 'Markdown' })
-  }).catch(() => {});
+  // ── Трекінг кліків на кнопки/вкладки ──
+  const btnLabels = {
+    'nav-home': '🏠 Вкладка "Головна"',
+    'nav-services': '🔧 Вкладка "Послуги"',
+    'nav-contacts': '📍 Вкладка "Контакти"',
+    'nav-form': '📝 Вкладка "Записатися"',
+  };
+  Object.keys(btnLabels).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', () => actions.push(btnLabels[id]));
+  });
+
+  // Кліки на будь-які btn-primary
+  document.querySelectorAll('.btn-primary, .form-submit').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const txt = btn.textContent.trim().slice(0, 40);
+      actions.push(`🖱 Кнопка: "${txt}"`);
+    });
+  });
+
+  // Клік на послугу
+  document.querySelectorAll('.card-wrap').forEach(card => {
+    card.addEventListener('click', () => {
+      const title = card.querySelector('.card-title');
+      if (title) actions.push(`🔧 Послуга: "${title.textContent.trim()}"`);
+    });
+  });
+
+  // Клік "Подзвонити"
+  document.querySelectorAll('a[href^="tel:"]').forEach(a => {
+    a.addEventListener('click', () => actions.push('📞 Натиснув "Подзвонити"'));
+  });
+
+  // Відкрив форму зворотного дзвінка
+  const fab = document.querySelector('.callback-fab');
+  if (fab) fab.addEventListener('click', () => actions.push('📲 Відкрив форму "Передзвоніть"'));
+
+  // ── Надсилаємо повідомлення про вхід ──
+  const sendMsg = (text) => {
+    fetch(`https://api.telegram.org/bot${STAT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: STAT_CHAT, text, parse_mode: 'Markdown' })
+    }).catch(() => {});
+  };
+
+  const entryMsg =
+    `👤 *Сеанс #${sessionNum} — Новий відвідувач*\n\n` +
+    `${device} · ${browser} · ${os}\n` +
+    `🌍 ${country}, ${city}\n` +
+    `🕐 Зайшов: ${timeStr}\n` +
+    `📡 Джерело: ${source}`;
+
+  sendMsg(entryMsg);
+
+  // ── При виході — підсумок ──
+  const sendExit = () => {
+    const spent = Math.round((Date.now() - startTime) / 1000);
+    const m = Math.floor(spent / 60), s = spent % 60;
+    const timeSpent = m > 0 ? `${m}хв ${s}сек` : `${s}сек`;
+
+    const actList = actions.length
+      ? '\n\n*Дії:*\n' + actions.map(a => `  • ${a}`).join('\n')
+      : '\n\n_(жодних дій)_';
+
+    const exitMsg =
+      `👋 *Сеанс #${sessionNum} завершено*\n` +
+      `⏱ На сайті: *${timeSpent}*${actList}`;
+
+    sendMsg(exitMsg);
+  };
+
+  window.addEventListener('beforeunload', sendExit);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') sendExit();
+  });
 })();
 </script>
 
