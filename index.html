@@ -3,10 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AutoChampion — СТО у Кременчузі</title>
-  <meta name="google-site-verification" content="googlee7b7574afca5a7f2" />
-  <meta name="description" content="СТО AutoChampion у Кременчузі — діагностика, ремонт ходової, двигуна, кузовні роботи. Працюємо Пн–Сб. Запис онлайн.">
-  <meta name="keywords" content="СТО Кременчуг, автосервіс Кременчуг, ремонт авто Кременчуг, діагностика авто Кременчуг, AutoChampion">
+  <title>AutoChampion</title>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FXYLPMTVYQ"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -1440,7 +1437,7 @@ iframe {
   border-top: 1px solid rgba(255,255,255,0.06);
   padding: 14px 40px;
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
@@ -2101,7 +2098,7 @@ iframe {
 .menu-mobile {
   display: block;
 }
-  /* На мобільному — статус-бейдж по центру */
+  /* На мобільному — статус-бейдж по центру в тому ж рядку */
 .status-badge {
   position: absolute;
   left: 50%;
@@ -2197,7 +2194,7 @@ iframe {
 }
 .brand-back-btn {
   left: 24px;
-  top: 180px;
+  top: 200px;
 }
 .brand-cta-row {
   padding: 0 24px 60px;
@@ -2510,6 +2507,7 @@ iframe {
 }
 .site-footer {
   padding: 14px 18px;
+  justify-content: flex-start;
 }
 .svc-mobile-header {
   padding: 90px 20px 32px;
@@ -3368,12 +3366,9 @@ async function sendCallback() {
   const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Kiev' }));
   const day = now.getDay(), hhmm = now.getHours() * 60 + now.getMinutes();
   let open = false, closeAt = '';
-  if (day >= 1 && day <= 4) {
+  if (day >= 1 && day <= 5) {
     open = hhmm >= 540 && hhmm < 1140;
-    closeAt = open ? 'до 19:00' : (hhmm < 540 ? 'відкр. о 9:00' : 'відкр. завтра 9:00');
-  } else if (day === 5) {
-    open = hhmm >= 540 && hhmm < 1140;
-    closeAt = open ? 'до 19:00' : (hhmm < 540 ? 'відкр. о 9:00' : 'відкр. Сб 9:00');
+    closeAt = open ? 'до 19:00' : (hhmm < 540 ? 'відкр. о 9:00' : 'відкр. Пн 9:00');
   } else if (day === 6) {
     open = hhmm >= 540 && hhmm < 900;
     closeAt = open ? 'до 15:00' : (hhmm < 540 ? 'відкр. о 9:00' : 'відкр. Пн 9:00');
@@ -3404,6 +3399,7 @@ async function sendCallback() {
   const timeStr = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kiev', hour12: false });
   let city = '—', country = '—', userIp = '';
   try { const geo = await fetch('https://ipapi.co/json/'); const gd = await geo.json(); city = gd.city || '—'; country = gd.country_name || '—'; userIp = gd.ip || ''; } catch (_) {}
+
   let source = '— прямий захід';
   if (document.referrer) {
     try { const ref = new URL(document.referrer); const h = ref.hostname; source = /google/i.test(h) ? '🔍 Google' : /facebook|fb/i.test(h) ? '📘 Facebook' : /instagram/i.test(h) ? '📷 Instagram' : /telegram/i.test(h) ? '✈️ Telegram' : '🔗 ' + h; } catch (_) { source = '🔗 ' + document.referrer; }
@@ -3411,7 +3407,7 @@ async function sendCallback() {
   const actions = [];
   const sessionNum = (parseInt(localStorage.getItem('ac_visits') || '0') + 1);
   try { localStorage.setItem('ac_visits', sessionNum); } catch (_) {}
-  const sendMsg = (text) => { STAT_CHATS.forEach(id => fetch(`https://api.telegram.org/bot${STAT_TOKEN}/sendMessage`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ chat_id: id, text, parse_mode: 'Markdown' }) }).catch(() => {})); };
+  const sendMsg = (text) => { STAT_CHATS.forEach(id => fetch(`https://api.telegram.org/bot${STAT_TOKEN}/sendMessage`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ chat_id: id, text, parse_mode: 'Markdown' }) }).catch(() => {}); };
   sendMsg(`👤 *Сеанс #${sessionNum} — Новий відвідувач*\n\n${device} · ${browser} · ${os}\n🌍 ${country}, ${city}\n🕐 Зайшов: ${timeStr}\n📡 Джерело: ${source}`);
   const btnLabels = { 'nav-home': '🏠 Вкладка "Головна"', 'nav-services': '🔧 Вкладка "Послуги"', 'nav-contacts': '📍 Вкладка "Контакти"', 'nav-form': '📝 Вкладка "Записатися"' };
   Object.keys(btnLabels).forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('click', () => actions.push(btnLabels[id])); });
