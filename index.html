@@ -2098,10 +2098,11 @@ iframe {
 .menu-mobile {
   display: block;
 }
-  /* На мобільному — статус-бейдж у нормальному потоці (не абсолютний) */
+  /* На мобільному — статус-бейдж по центру */
 .status-badge {
-  position: static;
-  transform: none;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
 }
 .hero-content {
