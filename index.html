@@ -3366,12 +3366,9 @@ async function sendCallback() {
   const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Kiev' }));
   const day = now.getDay(), hhmm = now.getHours() * 60 + now.getMinutes();
   let open = false, closeAt = '';
-  if (day >= 1 && day <= 4) {
+  if (day >= 1 && day <= 5) {
     open = hhmm >= 540 && hhmm < 1140;
-    closeAt = open ? 'до 19:00' : (hhmm < 540 ? 'відкр. о 9:00' : 'відкр. завтра 9:00');
-  } else if (day === 5) {
-    open = hhmm >= 540 && hhmm < 1140;
-    closeAt = open ? 'до 19:00' : (hhmm < 540 ? 'відкр. о 9:00' : 'відкр. Сб 9:00');
+    closeAt = open ? 'до 19:00' : (hhmm < 540 ? 'відкр. о 9:00' : 'відкр. Пн 9:00');
   } else if (day === 6) {
     open = hhmm >= 540 && hhmm < 900;
     closeAt = open ? 'до 15:00' : (hhmm < 540 ? 'відкр. о 9:00' : 'відкр. Пн 9:00');
