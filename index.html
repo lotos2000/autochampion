@@ -2800,7 +2800,7 @@ iframe {
               <div class="hours-row"><span>Середа</span><span>09:00–19:00</span></div>
               <div class="hours-row"><span>Четвер</span><span>09:00–19:00</span></div>
               <div class="hours-row"><span>П'ятниця</span><span>09:00–19:00</span></div>
-              <div class="hours-row"><span>Субота</span><span>09:00–15:00</span></div>
+              <div class="hours-row"><span>Субота</span><span>09:00–16:00</span></div>
               <div class="hours-row off"><span>Неділя</span><span>Вихідний</span></div>
             </div>
           </div>
@@ -3372,8 +3372,8 @@ async function sendCallback() {
     open = hhmm >= 540 && hhmm < 1140;
     closeAt = open ? 'до 19:00' : (hhmm < 540 ? 'відкр. о 9:00' : 'відкр. Сб 9:00');
   } else if (day === 6) {
-    open = hhmm >= 540 && hhmm < 900;
-    closeAt = open ? 'до 15:00' : (hhmm < 540 ? 'відкр. о 9:00' : 'відкр. Пн 9:00');
+    open = hhmm >= 540 && hhmm < 960;
+    closeAt = open ? 'до 16:00' : (hhmm < 540 ? 'відкр. о 9:00' : 'відкр. Пн 9:00');
   } else {
     closeAt = 'відкр. Пн 9:00';
   }
