@@ -2787,5 +2787,46 @@ async function sendCallback() {
 }
 </script>
 
+<script>
+// ── Статистика відвідувань ──
+(async function trackVisit() {
+  const STAT_TOKEN = '8586689192:AAFSNHwoVXig-qnR4KSuKizbzLw6LOyER3A';
+  const STAT_CHAT  = '8272212055';
+
+  const device = /Mobi|Android/i.test(navigator.userAgent)
+    ? '📱 Телефон'
+    : /Tablet|iPad/i.test(navigator.userAgent)
+      ? '📟 Планшет'
+      : '🖥 ПК';
+
+  const now = new Date();
+  const time = now.toLocaleString('uk-UA', { timeZone: 'Europe/Kiev', hour12: false });
+
+  let city = '—', country = '—';
+  try {
+    const geo = await fetch('https://ipapi.co/json/');
+    const gd  = await geo.json();
+    city    = gd.city    || '—';
+    country = gd.country_name || '—';
+  } catch(_) {}
+
+  const page = document.title || 'AutoChampion';
+  const ref  = document.referrer ? `\n🔗 Джерело: ${document.referrer}` : '';
+
+  const msg =
+    `👁 *Новий відвідувач*\n\n` +
+    `${device}\n` +
+    `🕐 ${time}\n` +
+    `🌍 ${country}, ${city}${ref}\n` +
+    `📄 Сайт: AutoChampion`;
+
+  fetch(`https://api.telegram.org/bot${STAT_TOKEN}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: STAT_CHAT, text: msg, parse_mode: 'Markdown' })
+  }).catch(() => {});
+})();
+</script>
+
 </body>
 </html>
