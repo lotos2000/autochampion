@@ -2133,7 +2133,7 @@
     document.querySelectorAll('.car-row-left:not(.visible), .car-row-right:not(.visible)').forEach(el => el.classList.add('visible'));
   }, 1500);
   const TG_TOKEN   = '8512480440:AAE2CTs5TXrenDUDpsih-fLkvhr4_HDtDpU';
-  const TG_CHAT_ID = '8272212055';
+  const TG_CHAT_ID = '1180880190';
 
   async function sendToTelegram(e) {
     e.preventDefault();
@@ -2772,7 +2772,7 @@ async function sendCallback() {
   btn.disabled = true;
   btn.textContent = 'Відправляємо...';
   const token = '8512480440:AAE2CTs5TXrenDUDpsih-fLkvhr4_HDtDpU';
-  const chatId = '8272212055';
+  const chatId = '1180880190';
   const msg = `📞 *Зворотній дзвінок*\n\nНомер: \`${phone}\`\n\nКлієнт просить передзвонити!`;
   try {
     await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
