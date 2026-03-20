@@ -1437,7 +1437,7 @@ iframe {
   border-top: 1px solid rgba(255,255,255,0.06);
   padding: 14px 40px;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
@@ -2193,7 +2193,7 @@ iframe {
 }
 .brand-back-btn {
   left: 24px;
-  top: 80px;
+  top: 180px;
 }
 .brand-cta-row {
   padding: 0 24px 60px;
@@ -2472,7 +2472,7 @@ iframe {
 }
 .brand-back-btn {
   left: 18px;
-  top: 72px;
+  top: 180px;
   font-size: 10px;
   padding: 8px 14px;
 }
@@ -3364,9 +3364,12 @@ async function sendCallback() {
   const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Kiev' }));
   const day = now.getDay(), hhmm = now.getHours() * 60 + now.getMinutes();
   let open = false, closeAt = '';
-  if (day >= 1 && day <= 5) {
+  if (day >= 1 && day <= 4) {
     open = hhmm >= 540 && hhmm < 1140;
-    closeAt = open ? 'до 19:00' : (hhmm < 540 ? 'відкр. о 9:00' : 'відкр. Пн 9:00');
+    closeAt = open ? 'до 19:00' : (hhmm < 540 ? 'відкр. о 9:00' : 'відкр. завтра 9:00');
+  } else if (day === 5) {
+    open = hhmm >= 540 && hhmm < 1140;
+    closeAt = open ? 'до 19:00' : (hhmm < 540 ? 'відкр. о 9:00' : 'відкр. Сб 9:00');
   } else if (day === 6) {
     open = hhmm >= 540 && hhmm < 900;
     closeAt = open ? 'до 15:00' : (hhmm < 540 ? 'відкр. о 9:00' : 'відкр. Пн 9:00');
@@ -3388,7 +3391,7 @@ async function sendCallback() {
   if (!navigator.userAgent || navigator.userAgent.length < 30 || !navigator.language) return;
 
   const STAT_TOKEN = '8586689192:AAFSNHwoVXig-qnR4KSuKizbzLw6LOyER3A';
-  const STAT_CHAT  = '8272212055';
+  const STAT_CHATS = ['8272212055', '1180880190'];
   const ua = navigator.userAgent;
   const device = /Mobi|Android/i.test(ua) ? '📱 Телефон' : /Tablet|iPad/i.test(ua) ? '📟 Планшет' : '🖥 ПК';
   const browser = /Edg/i.test(ua) ? 'Edge' : /OPR|Opera/i.test(ua) ? 'Opera' : /Chrome/i.test(ua) ? 'Chrome' : /Firefox/i.test(ua) ? 'Firefox' : /Safari/i.test(ua) ? 'Safari' : 'Інший';
@@ -3397,8 +3400,6 @@ async function sendCallback() {
   const timeStr = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kiev', hour12: false });
   let city = '—', country = '—', userIp = '';
   try { const geo = await fetch('https://ipapi.co/json/'); const gd = await geo.json(); city = gd.city || '—'; country = gd.country_name || '—'; userIp = gd.ip || ''; } catch (_) {}
-  const BLOCKED_IPS = ['194.12.66.206'];
-  if (BLOCKED_IPS.includes(userIp)) return;
   let source = '— прямий захід';
   if (document.referrer) {
     try { const ref = new URL(document.referrer); const h = ref.hostname; source = /google/i.test(h) ? '🔍 Google' : /facebook|fb/i.test(h) ? '📘 Facebook' : /instagram/i.test(h) ? '📷 Instagram' : /telegram/i.test(h) ? '✈️ Telegram' : '🔗 ' + h; } catch (_) { source = '🔗 ' + document.referrer; }
@@ -3406,7 +3407,7 @@ async function sendCallback() {
   const actions = [];
   const sessionNum = (parseInt(localStorage.getItem('ac_visits') || '0') + 1);
   try { localStorage.setItem('ac_visits', sessionNum); } catch (_) {}
-  const sendMsg = (text) => { fetch(`https:// api.telegram.org/bot${STAT_TOKEN}/sendMessage`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ chat_id: STAT_CHAT, text, parse_mode: 'Markdown' }) }).catch (() => {}); };
+  const sendMsg = (text) => { STAT_CHATS.forEach(id => fetch(`https://api.telegram.org/bot${STAT_TOKEN}/sendMessage`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ chat_id: id, text, parse_mode: 'Markdown' }) }).catch(() => {})); };
   sendMsg(`👤 *Сеанс #${sessionNum} — Новий відвідувач*\n\n${device} · ${browser} · ${os}\n🌍 ${country}, ${city}\n🕐 Зайшов: ${timeStr}\n📡 Джерело: ${source}`);
   const btnLabels = { 'nav-home': '🏠 Вкладка "Головна"', 'nav-services': '🔧 Вкладка "Послуги"', 'nav-contacts': '📍 Вкладка "Контакти"', 'nav-form': '📝 Вкладка "Записатися"' };
   Object.keys(btnLabels).forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('click', () => actions.push(btnLabels[id])); });
