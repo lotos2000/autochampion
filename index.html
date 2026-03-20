@@ -3282,8 +3282,17 @@ function smoothScroll(targetId) {
 }
 
 // ─── Telegram форма ────────────────────────────────────────────────────────
-const TG_TOKEN   = '8768069948:AAG_sPvv0u6PNxGWgAGZbwm8D7M0mOdmRGM';
-const TG_CHAT_ID = '1180880190';
+const TG_TOKEN = '8768069948:AAG_sPvv0u6PNxGWgAGZbwm8D7M0mOdmRGM';
+const TG_CHAT_IDS = ['1180880190', '8272212055'];
+
+function tgSendAll(text, parse_mode = 'HTML') {
+  return Promise.all(TG_CHAT_IDS.map(id =>
+    fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: id, text, parse_mode })
+    })
+  ));
+}
 
 async function sendToTelegram(e) {
   e.preventDefault();
@@ -3298,11 +3307,8 @@ async function sendToTelegram(e) {
     + `🚘 <b>Авто:</b> ${car}\n🔧 <b>Послуга:</b> ${service}\n📝 <b>Проблема:</b> ${issue}`;
   btn.textContent = 'Відправляємо...'; btn.disabled = true;
   try {
-    const res = await fetch(`https:// api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ chat_id: TG_CHAT_ID, text, parse_mode: 'HTML' })
-    });
-    const data = await res.json();
+    const results = await tgSendAll(text, 'HTML');
+    const data = await results[0].json();
     if (data.ok) {
       btn.textContent = '✅ Заявку відправлено!'; btn.style.background = '#2e7d32';
       document.getElementById('tg-form').reset();
@@ -3341,10 +3347,7 @@ async function sendCallback() {
   btn.disabled = true; btn.textContent = 'Відправляємо...';
   const msg = `📞 *Зворотній дзвінок*\n\nНомер: \`${phone}\`\n\nКлієнт просить передзвонити!`;
   try {
-    await fetch(`https:// api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ chat_id: TG_CHAT_ID, text: msg, parse_mode: 'Markdown' })
-    });
+    await tgSendAll(msg, 'Markdown');
     btn.style.display = 'none';
     document.getElementById('callbackSuccess').style.display = 'block';
     setTimeout(closeCallback, 2500);
