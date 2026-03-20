@@ -2098,19 +2098,12 @@ iframe {
 .menu-mobile {
   display: block;
 }
-  /* На мобільному — статус-бейдж по центру в окремому рядку */
-.navbar {
-  flex-wrap: wrap;
-  padding: 12px 20px;
-}
+  /* На мобільному — статус-бейдж по центру в тому ж рядку */
 .status-badge {
-  position: static;
-  transform: none;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  order: 3;
-  width: 100%;
-  justify-content: center;
-  margin: 8px 0 0;
 }
 .hero-content {
   padding: 0 24px;
