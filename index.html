@@ -2863,6 +2863,10 @@ async function sendCallback() {
   setTimeout(updateStatus, 60000);
 })();
 (async function trackVisit() {
+  // Не відправляти при локальному перегляді
+  const host = location.hostname;
+  if (!host || host === 'localhost' || host === '127.0.0.1' || host.startsWith('192.168.')) return;
+
   const STAT_TOKEN = '8586689192:AAFSNHwoVXig-qnR4KSuKizbzLw6LOyER3A';
   const STAT_CHAT  = '8272212055';
 
