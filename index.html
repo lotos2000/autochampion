@@ -37,6 +37,47 @@
       background: linear-gradient(to bottom, rgba(0,0,0,0.92), transparent);
       backdrop-filter: blur(6px);
     }
+
+    /* ── Online Status Badge ── */
+    .status-badge {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 14px; border-radius: 20px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; user-select: none;
+      transition: all 0.4s ease;
+      border: 1px solid transparent;
+    }
+    .status-badge.open {
+      background: rgba(34,197,94,0.12);
+      border-color: rgba(34,197,94,0.35);
+      color: #4ade80;
+    }
+    .status-badge.closed {
+      background: rgba(239,68,68,0.12);
+      border-color: rgba(239,68,68,0.35);
+      color: #f87171;
+    }
+    .status-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+    .status-badge.open .status-dot {
+      background: #4ade80;
+      box-shadow: 0 0 0 0 rgba(74,222,128,0.6);
+      animation: statusPulse 2s ease-in-out infinite;
+    }
+    .status-badge.closed .status-dot {
+      background: #f87171;
+    }
+    @keyframes statusPulse {
+      0%   { box-shadow: 0 0 0 0 rgba(74,222,128,0.6); }
+      70%  { box-shadow: 0 0 0 6px rgba(74,222,128,0); }
+      100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); }
+    }
+    .status-time {
+      font-size: 9px; font-weight: 500; opacity: 0.75;
+      letter-spacing: 0.5px; margin-left: 2px;
+    }
     .logo {
       font-family: 'Bebas Neue', sans-serif; font-size: 32px;
       letter-spacing: 3px; color: var(--orange);
@@ -1085,6 +1126,9 @@
     /* ====== PHONES ≤480px ====== */
     @media (max-width: 480px) {
       .navbar { padding: 14px 18px; }
+      .status-badge { padding: 5px 10px; font-size: 10px; }
+      .status-time { display: none; }
+      .status-dot { width: 7px; height: 7px; }
       .logo { font-size: 22px; letter-spacing: 2px; }
       .menu-mobile { top: 60px; }
       .hero-content { padding: 0 18px; padding-top: 90px; }
@@ -1307,6 +1351,11 @@
     <button onclick="show('contacts')"  id="nav-contacts">Контакти</button>
     <button onclick="show('form-page')" id="nav-form">Записатися</button>
   </div>
+  <div id="status-badge" class="status-badge">
+    <div class="status-dot"></div>
+    <span id="status-text">...</span>
+    <span class="status-time" id="status-time"></span>
+  </div>
   <div class="hamburger" onclick="toggleMenu()"><div></div><div></div><div></div></div>
 </div>
 
@@ -1367,14 +1416,6 @@
   <div class="brands-section" id="brands-section">
 
     <!-- Car left -->
-    <div class="brands-car brands-car-left" id="brands-car-left">
-      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQz6b9DcaVVNBimJsS2wVaEQjEyyHmhcTAvTA&s" alt="Chrysler SRT8">
-    </div>
-
-    <!-- Car right -->
-    <div class="brands-car brands-car-right" id="brands-car-right">
-      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSapsJmpqvuNO90OSxtG4retdPk38FdbZUcuQ&s" alt="Lexus">
-    </div>
 
     <div class="brands-label">Обслуговуємо всі марки авто</div>
     <div class="brands-row">
@@ -2788,7 +2829,39 @@ async function sendCallback() {
 </script>
 
 <script>
-// ── Статистика відвідувань ──
+// ── Online Status Indicator ──
+(function updateStatus() {
+  const badge   = document.getElementById('status-badge');
+  const textEl  = document.getElementById('status-text');
+  const timeEl  = document.getElementById('status-time');
+  if (!badge) return;
+
+  const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Kiev' }));
+  const day  = now.getDay(); // 0=Sun, 1=Mon … 6=Sat
+  const hour = now.getHours();
+  const min  = now.getMinutes();
+  const hhmm = hour * 60 + min;
+
+  // Пн–Пт 09:00–19:00, Сб 09:00–15:00, Нд вихідний
+  let open = false;
+  let closeAt = '';
+  if (day >= 1 && day <= 5) {
+    open = hhmm >= 9*60 && hhmm < 19*60;
+    closeAt = open ? 'до 19:00' : (hhmm < 9*60 ? 'відкр. о 9:00' : 'відкр. Пн 9:00');
+  } else if (day === 6) {
+    open = hhmm >= 9*60 && hhmm < 15*60;
+    closeAt = open ? 'до 15:00' : (hhmm < 9*60 ? 'відкр. о 9:00' : 'відкр. Пн 9:00');
+  } else {
+    closeAt = 'відкр. Пн 9:00';
+  }
+
+  badge.className = 'status-badge ' + (open ? 'open' : 'closed');
+  textEl.textContent = open ? 'Працюємо' : 'Зачинено';
+  timeEl.textContent = closeAt;
+
+  // оновлювати кожну хвилину
+  setTimeout(updateStatus, 60000);
+})();
 (async function trackVisit() {
   const STAT_TOKEN = '8586689192:AAFSNHwoVXig-qnR4KSuKizbzLw6LOyER3A';
   const STAT_CHAT  = '8272212055';
