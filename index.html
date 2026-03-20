@@ -3399,8 +3399,7 @@ async function sendCallback() {
   const timeStr = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kiev', hour12: false });
   let city = '—', country = '—', userIp = '';
   try { const geo = await fetch('https://ipapi.co/json/'); const gd = await geo.json(); city = gd.city || '—'; country = gd.country_name || '—'; userIp = gd.ip || ''; } catch (_) {}
-  const BLOCKED_IPS = ['194.12.66.206'];
-  if (BLOCKED_IPS.includes(userIp)) return;
+
   let source = '— прямий захід';
   if (document.referrer) {
     try { const ref = new URL(document.referrer); const h = ref.hostname; source = /google/i.test(h) ? '🔍 Google' : /facebook|fb/i.test(h) ? '📘 Facebook' : /instagram/i.test(h) ? '📷 Instagram' : /telegram/i.test(h) ? '✈️ Telegram' : '🔗 ' + h; } catch (_) { source = '🔗 ' + document.referrer; }
